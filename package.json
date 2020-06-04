@@ -17,9 +17,11 @@
     "repro-firefox-gzip-bug": "scripts/run-repro-firefox-gzip-bug.js"
   },
   "scripts": {
+    "build": "npm run build:docker",
+    "build:docker": "docker build . -t applitools/firefox-rendering-image:77.0.1",
     "start": "scripts/run-repro-firefox-gzip-bug.js",
     "start:selenium-docker": "docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox",
-    "start:fri-docker": "docker run -d -p 2828:2828 -v /dev/shm:/dev/shm applitools/firefox-rendering-image:77.0.1",
+    "start:docker": "docker run -d -p 2828:2828 -v /dev/shm:/dev/shm applitools/firefox-rendering-image:77.0.1",
     "start:geckodriver": "geckodriver --connect-existing --marionette-port 2828 -v",
     "test": "npm run eslint && npm run test:mocha",
     "test:mocha": "mocha --no-timeouts --exit 'test/unit/*.test.js' 'test/it/*.test.js' 'test/e2e/*.test.js'",
