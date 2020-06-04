@@ -138,7 +138,7 @@ user_pref("toolkit.telemetry.server", "https://%(server)s/dummy/telemetry/");
 user_pref("marionette.enabled", true);
 user_pref("marionette.contentListener", true);
 user_pref("marionette.prefs.recommended", true);
-user_pref("marionette.port", 2829);
+user_pref("marionette.port", 2828);
 user_pref("network.http.prompt-temp-redirect", false);
 user_pref("extensions.shield-recipe-client.api_url", "");
 user_pref("javascript.options.showInConsole", true);

@@ -63,6 +63,9 @@ COPY headless-firefox/prefs.js /moz-headless/prefs.js
 RUN apt-get install -y xvfb
 ENV DISPLAY=:99
 
+# Node.js
+RUN apt-get install -y curl sudo && curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - && sudo apt-get install -y nodejs
+
 # The reason we need a tcp proxy fis that marionette listens on 127.0.0.1 (and not on 0.0.0.0), which means
 # that it can't be connected through the docker container
 COPY --from=0 /tcp-proxy .
@@ -78,12 +81,21 @@ COPY headless-firefox/profile-prefs.js /moz-headless/prefs.js
 # them.
 ENV MOZ_FORCE_DISABLE_E10S=true
 
+COPY package*.json app/
+RUN cd /app && npm ci --production
+COPY src app/src/
+
 RUN echo \
     ' ********************************************************\n' \
-    '*** The Firefox version is now:' `firefox -version` '***\n' \
+    '**** The Firefox version is now:' `firefox -version` '****\n' \
+    '********************************************************\n'
+
+RUN echo \
+    ' ********************************************************\n' \
+    '**** The Node.js version is now:' `node --version` '****\n' \
     '********************************************************\n'
 
 EXPOSE 2828
 
-CMD ["sh" , "-c", "(./tcp-proxy -l='0.0.0.0:2828' -r='localhost:2829' &) && xvfb-run --server-num=99 --server-args='-screen 0 4096x4096x24' firefox -marionette --profile /moz-headless"]
+CMD ["sh" , "-c", "xvfb-run --server-num=99 --server-args='-screen 0 4096x4096x24' firefox -marionette --profile /moz-headless"]
 
