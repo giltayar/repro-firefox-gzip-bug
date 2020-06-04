@@ -18,7 +18,9 @@
   },
   "scripts": {
     "start": "scripts/run-repro-firefox-gzip-bug.js",
-    "start:docker": "docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox",
+    "start:selenium-docker": "docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox",
+    "start:fri-docker": "docker run -d -p 2828:2828 -v /dev/shm:/dev/shm applitools/firefox-rendering-image:77.0.1",
+    "start:geckodriver": "geckodriver --connect-existing --marionette-port 2828 -v",
     "test": "npm run eslint && npm run test:mocha",
     "test:mocha": "mocha --no-timeouts --exit 'test/unit/*.test.js' 'test/it/*.test.js' 'test/e2e/*.test.js'",
     "eslint": "eslint '**/*.js'"
@@ -39,6 +41,7 @@
   },
   "dependencies": {
     "debug": "^4.1.1",
+    "geckodriver": "^1.19.1",
     "selenium-webdriver": "^4.0.0-alpha.7",
     "yargs": "^15.3.1"
   },

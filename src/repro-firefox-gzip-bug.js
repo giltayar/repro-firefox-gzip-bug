@@ -1,10 +1,14 @@
 'use strict'
 const {Builder} = require('selenium-webdriver')
+// require('geckodriver')
 
 async function main() {
   const driver = await new Builder()
     .forBrowser('firefox')
-    .usingServer('http://localhost:4444/wd/hub')
+    // uncomment for accessing Selenium docker
+    // .usingServer('http://localhost:4444/wd/hub')
+    // use this for access the Applitools Docker image Browser
+    .usingServer('http://localhost:4444/')
     .build()
   try {
     await driver.get('https://www.amazon.com')
