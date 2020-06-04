@@ -1,0 +1,55 @@
+{
+  "name": "@applitools/repro-firefox-gzip-bug",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/repro-firefox-gzip-bug.js",
+  "engines": {
+    "node": ">=10.3.0"
+  },
+  "files": [
+    "src",
+    "scripts"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "bin": {
+    "repro-firefox-gzip-bug": "scripts/run-repro-firefox-gzip-bug.js"
+  },
+  "scripts": {
+    "start": "scripts/run-repro-firefox-gzip-bug.js",
+    "start:docker": "docker run -d -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox",
+    "test": "npm run eslint && npm run test:mocha",
+    "test:mocha": "mocha --no-timeouts --exit 'test/unit/*.test.js' 'test/it/*.test.js' 'test/e2e/*.test.js'",
+    "eslint": "eslint '**/*.js'"
+  },
+  "keywords": [
+    "applitools",
+    "utility",
+    "cli",
+    "nodejs",
+    "javascript"
+  ],
+  "author": "Gil Tayar <gil.tayar@applitools.com>",
+  "license": "UNLICENSED",
+  "repository": {
+    "url": "https://github.com/applitools/rendering-grid",
+    "type": "git",
+    "directory": "packages/repro-firefox-gzip-bug"
+  },
+  "dependencies": {
+    "debug": "^4.1.1",
+    "selenium-webdriver": "^4.0.0-alpha.7",
+    "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "@applitools/console-testkit": "^1.1.1",
+    "chai": "^4.2.0",
+    "eslint": "^7.1.0",
+    "eslint-plugin-mocha-no-only": "^1.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "mocha": "^7.2.0",
+    "prettier": "^2.0.5"
+  }
+}
