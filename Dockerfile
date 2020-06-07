@@ -21,12 +21,35 @@ ENV RANDOM_ENV_TO_FORCE_BUILD=${RANDOM_BUILD_ARG}
 RUN apt-get update -y && \
     apt-get install -y wget
 
-ENV FIREFOX_VERSION=77.0.1
+
+#==============================
+# Locale and encoding settings
+#==============================
+# ENV LANG_WHICH en
+# ENV LANG_WHERE US
+# ENV ENCODING UTF-8
+# ENV LANGUAGE ${LANG_WHICH}_${LANG_WHERE}.${ENCODING}
+# ENV LANG ${LANGUAGE}
+# # Layer size: small: ~9 MB
+# # Layer size: small: ~9 MB MB (with --no-install-recommends)
+# RUN apt-get -qqy update \
+#   && apt-get -qqy --no-install-recommends install \
+#     language-pack-en \
+#     tzdata \
+#     locales \
+#   && locale-gen ${LANGUAGE} \
+#   && dpkg-reconfigure --frontend noninteractive locales \
+#   && apt-get -qyy autoremove \
+#   && rm -rf /var/lib/apt/lists/* \
+#   && apt-get -qyy clean
+
+
+ENV FIREFOX_VERSION=latest
 
 # FF
 RUN FIREFOX_DOWNLOAD_URL=$(if [ $FIREFOX_VERSION = "latest" ] || [ $FIREFOX_VERSION = "nightly-latest" ] || [ $FIREFOX_VERSION = "devedition-latest" ]; then echo "https://download.mozilla.org/?product=firefox-$FIREFOX_VERSION-ssl&os=linux64&lang=en-US"; else echo "https://download-installer.cdn.mozilla.net/pub/firefox/releases/$FIREFOX_VERSION/linux-x86_64/en-US/firefox-$FIREFOX_VERSION.tar.bz2"; fi) \
   && apt-get update -qqy \
-  && apt-get -qqy --no-install-recommends install firefox \
+  && apt-get -qqy --no-install-recommends install firefox libavcodec-extra \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
   && wget --no-verbose -O /tmp/firefox.tar.bz2 $FIREFOX_DOWNLOAD_URL \
   && apt-get -y purge firefox \
@@ -76,7 +99,7 @@ COPY headless-firefox/profile-prefs.js /moz-headless/prefs.js
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1567168#c9. This flag disables FF E10s (Electrolysis), which is the
 # FF architecture that puts various elemenets in different processes, and uses Shared memory to communicate between
 # them.
-ENV MOZ_FORCE_DISABLE_E10S=true
+# ENV MOZ_FORCE_DISABLE_E10S=true
 
 RUN echo \
     ' ********************************************************\n' \
@@ -85,5 +108,12 @@ RUN echo \
 
 EXPOSE 2828
 
-CMD ["sh" , "-c", "(./tcp-proxy -l='0.0.0.0:2828' -r='localhost:2829' &) && xvfb-run --server-num=99 --server-args='-screen 0 4096x4096x24' firefox -marionette --profile /moz-headless"]
+#==========
+# Relaxing permissions for OpenShift and other non-sudo environments
+#==========
+# RUN apt-get install -y sudo && sudo chmod -R 777 ${HOME} \
+#   && sudo chgrp -R 0 ${HOME} \
+#   && sudo chmod -R g=u ${HOME}
+
+CMD ["sh" , "-c", "(./tcp-proxy -l='0.0.0.0:2828' -r='localhost:2829' &) && xvfb-run --server-num=99 --server-args='-screen 0 4096x4096x24' firefox -marionette -foreground -no-remote --profile /moz-headless"]
 

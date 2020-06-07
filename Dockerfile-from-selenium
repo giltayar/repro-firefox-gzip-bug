@@ -1,0 +1,51 @@
+FROM golang:latest
+
+# COPY ./tcp-proxy .
+# RUN go build -o bin/tcp-proxy ./tcp-proxy/cmd/tcp-proxy
+COPY ./tcp-proxy /go/src/github.com/jpillora/go-tcp-proxy
+WORKDIR /go/src/github.com/jpillora/go-tcp-proxy
+RUN go get ./... && \
+    CGO_ENABLED=0 GOOS=linux go build -o /tcp-proxy cmd/tcp-proxy/main.go
+
+FROM selenium/standalone-firefox
+ENV LC_ALL C
+ENV DEBIAN_FRONTEND noninteractive
+ENV DEBCONF_NONINTERACTIVE_SEEN true
+
+ARG RANDOM_BUILD_ARG=123444
+ENV RANDOM_ENV_TO_FORCE_BUILD=${RANDOM_BUILD_ARG}
+
+RUN firefox -CreateProfile "headless /moz-headless"  -headless
+
+# ENV DISPLAY=:99
+
+# The reason we need a tcp proxy fis that marionette listens on 127.0.0.1 (and not on 0.0.0.0), which means
+# that it can't be connected through the docker container
+COPY --from=0 /tcp-proxy .
+
+# Profile prefs
+COPY headless-firefox/profile-prefs.js /moz-headless/prefs.js
+
+# This flag is a workaround for the fact that FF uses shared memory, and the shared memory size
+# that K8s gives is 64MB, and is currently unalterable (https://github.com/kubernetes/kubernetes/issues/28272).
+# This makes various sites crash FF (or a tab in FF) sporadically. I opened a ticket on it till I figured it out:
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1567168#c9. This flag disables FF E10s (Electrolysis), which is the
+# FF architecture that puts various elemenets in different processes, and uses Shared memory to communicate between
+# them.
+ENV MOZ_FORCE_DISABLE_E10S=true
+
+RUN echo \
+    ' ********************************************************\n' \
+    '*** The Firefox version is now:' `firefox -version` '***\n' \
+    '********************************************************\n'
+
+USER root
+
+RUN rm /etc/supervisor/conf.d/selenium.conf
+
+USER seluser
+
+EXPOSE 2828
+
+CMD ["sh" , "-c", "(./tcp-proxy -l='0.0.0.0:2828' -r='localhost:2829' &) && xvfb-run --server-num=99 --server-args='-screen 0 4096x4096x24' firefox -marionette -foreground -no-remote --profile /moz-headless"]
+
