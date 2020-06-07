@@ -148,3 +148,6 @@ user_pref("image.animation_mode", "none");
 // durrently unused, but who knows?
 user_pref("browser.tabs.remote.autostart", false);
 user_pref("browser.tabs.remote.autostart.2", false);
+
+user_pref("network.http.accept-encoding", "");
+user_pref("network.http.accept-encoding.secure", "");
